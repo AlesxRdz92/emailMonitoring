@@ -14,7 +14,7 @@ exch.Url = new ews.Uri(conf.url);
 //let folderId = new ews.FolderId(ews.WellKnownFolderName.Inbox);
 //console.log(folderId);
 exch.SubscribeToStreamingNotifications([new ews.FolderId(ews.WellKnownFolderName.Inbox)], ews.EventType.NewMail, ews.EventType.FreeBusyChanged).then(streaming => {
-    let connection = new ews.StreamingSubscriptionConnection(exch, 5);
+    let connection = new ews.StreamingSubscriptionConnection(exch, 30);
     connection.AddSubscription(streaming);
     connection.OnNotificationEvent.push((o, a) => {
         logging.log(1, 'Notification recivied', JSON.stringify(a));

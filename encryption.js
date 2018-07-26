@@ -27,7 +27,7 @@ function decrypt(encrypted) {
 
 const crypto = require('crypto'),
     algorithm = 'aes-256-ctr',
-    password = '3zTvzr3p67VC61jmV54rIYu1545x4TlY';
+    password = process.env.KEY;
 
 function encrypt(text){
   var cipher = crypto.createCipher(algorithm,password)
