@@ -1,10 +1,10 @@
-var crypto = require('crypto'),
+/*var crypto = require('crypto'),
   algorithm = 'aes-256-gcm',
-  password = '3zTvzr3p67VC61jmV54rIYu1545x4TlY',
+  password = '3zTvzr3p67VC61jmV54rIYu1545x4TlY';
   // do not use a global iv for production, 
   // generate a new one for each encryption
   //iv = '60iP0h6vJoEa'
-  iv = crypto.randomBytes(16);
+  //iv = crypto.randomBytes(16);
 
 function encrypt(text) {
   var cipher = crypto.createCipheriv(algorithm, password, iv)
@@ -23,9 +23,27 @@ function decrypt(encrypted) {
   var dec = decipher.update(encrypted.content, 'hex', 'utf8')
   dec += decipher.final('utf8');
   return dec;
+}*/
+
+const crypto = require('crypto'),
+    algorithm = 'aes-256-ctr',
+    password = '3zTvzr3p67VC61jmV54rIYu1545x4TlY';
+
+function encrypt(text){
+  var cipher = crypto.createCipher(algorithm,password)
+  var crypted = cipher.update(text,'utf8','hex')
+  crypted += cipher.final('hex');
+  return crypted;
+}
+ 
+function decrypt(text){
+  var decipher = crypto.createDecipher(algorithm,password)
+  var dec = decipher.update(text,'hex','utf8')
+  dec += decipher.final('utf8');
+  return dec;
 }
 
-var hw = encrypt("hello world")
-console.log(typeof hw.content);
-  // outputs hello world
-console.log(decrypt(hw));
+module.exports = {
+  encrypt,
+  decrypt
+}
