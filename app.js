@@ -7,10 +7,11 @@ var uniqueId = '';
 const dash = require('./dash');
 var files;
 const extract = require('extract-zip');
+var flag = false;
 const exch = new ews.ExchangeService(ews.ExchangeVersion.Exchange2010_SP2);
 exch.Credentials = new ews.ExchangeCredentials(conf.userName, conf.password);
 exch.Url = new ews.Uri(conf.url);
-//var mailbox = new ews.Mailbox('alejandro.gongora@wnco.com'); //It was possible to acces to the shared mailbox provided by Omar
+//var mailbox = new ews.Mailbox('alejandro.gongora@wnco.com'); //It was possible to access to the shared mailbox provided by Omar
 //let folderId = new ews.FolderId(ews.WellKnownFolderName.Inbox);
 //console.log(folderId);
 exch.SubscribeToStreamingNotifications([new ews.FolderId(ews.WellKnownFolderName.Inbox)], ews.EventType.NewMail, ews.EventType.FreeBusyChanged).then(streaming => {
@@ -20,23 +21,25 @@ exch.SubscribeToStreamingNotifications([new ews.FolderId(ews.WellKnownFolderName
         logging.log(1, 'Notification recivied', JSON.stringify(a));
         uniqueId = a.Events[0].itemId.UniqueId;
         ews.EmailMessage.Bind(exch, new ews.ItemId(uniqueId)).then(message => {
-            //logging.log(1, 'Message found', circular.stringify(message));
-            if (message.Subject === 'EWSTest' && message.HasAttachments) { //Test line, this one will change depending of the shared mailbox
+            if (message.Subject.includes(conf.sub)) {
+                logging.log(1, 'Email with the correct subject', uniqueId);
+                flag = true;
+                if (message.HasAttachments) { 
                 logging.log(1, 'Email with attachments', uniqueId);
                 let attch = new ews.FileAttachment;
                 attch = message.Attachments.Items[0];
                 attch.Load().then(() => {
-                    fs.writeFile(`./Files/${attch.Name}`, attch.Base64Content, { encoding: 'base64' }, err => {
+                        fs.writeFile(`${conf.folder}\\files\\${attch.Name}`, attch.Base64Content, { encoding: 'base64' }, err => {
                         if (err === 'undefined')
                             logging.log(3, 'Failed', err);
                         else {
                             logging.log(1, 'File Downloaded', 'Successful');
-                            extract('./Files/Test.zip', { dir: 'C:\\Users\\x244911\\FilesTemp' }, err => {
-                                //All the paths are harcoded for testing purposes, in production will be stored in program data folder
-                                files = fs.readdirSync('C:\\Users\\x244911\\FilesTemp').length;
+                                extract(`${conf.folder}\\files\\${attch.Name}`, { dir: `${conf.folder}\\FilesTemp` }, err => {
+                                    files = fs.readdirSync(`${conf.folder}\\FilesTemp`).length;
                                 logging.log(1, 'Email attachments', files);
-                                fs.removeSync('C:\\Users\\x244911\\FilesTemp');
-                                if (files >= 3)
+                                    fs.removeSync(`${conf.folder}\\FilesTemp`);
+                                    fs.unlinkSync(`${conf.folder}\\files\\LogFiles.zip`);
+                                    if (files >= 6)
                                     dash.sendReq(false);
                                 else
                                     dash.sendReq(true);
@@ -44,8 +47,11 @@ exch.SubscribeToStreamingNotifications([new ews.FolderId(ews.WellKnownFolderName
                         }
                     });
                 });
-            } else
+                } else {
+                    logging.log(1, 'The email does not have attachments', uniqueId);
                 dash.sendReq(true);
+                }
+            }
         });
     });
     connection.Open();
@@ -59,4 +65,11 @@ exch.SubscribeToStreamingNotifications([new ews.FolderId(ews.WellKnownFolderName
     });
 }).catch(e => {
     logging.log(3, 'Something failed', e);
+});
+
+schedule.scheduleJob('00 1 * * *', () => {
+    if(flag)
+        flag = false;
+    else
+        dash.sendReq(true);
 });

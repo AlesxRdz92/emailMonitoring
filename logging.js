@@ -1,4 +1,5 @@
 const fs = require('fs');
+const conf = require('./conf');
 
 var levels = {
     0: 'NOTSET',
@@ -9,7 +10,7 @@ var levels = {
 };
 
 var log = (status = 0, head, info = '') => {
-    fs.appendFile('log.log', `${new Date} ${levels[status]} ${head} ${info}\n`, err => {
+    fs.appendFile(`${conf.folder}\\log.log`, `${new Date} ${levels[status]} ${head} ${info}\n`, err => {
         console.log(err);
     });
 }
