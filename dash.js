@@ -2,7 +2,7 @@
 const logging = require('./logging');
 var sendReq = (flag) => {
     if(flag)
-        logging.log(1, 'An incident was raised');
+        logging.log(1, 'An incident is needed');
     else
         logging.log(1, 'Everything was fine');
 }

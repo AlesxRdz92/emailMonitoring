@@ -6,5 +6,6 @@ module.exports = {
         return encryption.decrypt(process.env.PASS);
     })(),
     url: 'https://www4-pdc.swalife.com/Ews/Exchange.asmx',
-    folder: `${process.env.ProgramData}\\LMSMonitoring`
+    folder: `${process.env.ProgramData}\\LMSMonitoring`,
+    sub: 'PROD Data Import Completed'
 };

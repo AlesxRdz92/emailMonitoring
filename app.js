@@ -24,32 +24,32 @@ exch.SubscribeToStreamingNotifications([new ews.FolderId(ews.WellKnownFolderName
             if (message.Subject.includes(conf.sub)) {
                 logging.log(1, 'Email with the correct subject', uniqueId);
                 flag = true;
-                if (message.HasAttachments) { 
-                logging.log(1, 'Email with attachments', uniqueId);
-                let attch = new ews.FileAttachment;
-                attch = message.Attachments.Items[0];
-                attch.Load().then(() => {
+                if (message.HasAttachments) {
+                    logging.log(1, 'Email with attachments', uniqueId);
+                    let attch = new ews.FileAttachment;
+                    attch = message.Attachments.Items[0];
+                    attch.Load().then(() => {
                         fs.writeFile(`${conf.folder}\\files\\${attch.Name}`, attch.Base64Content, { encoding: 'base64' }, err => {
-                        if (err === 'undefined')
-                            logging.log(3, 'Failed', err);
-                        else {
-                            logging.log(1, 'File Downloaded', 'Successful');
+                            if (err === 'undefined')
+                                logging.log(3, 'Failed', err);
+                            else {
+                                logging.log(1, 'File Downloaded', 'Successful');
                                 extract(`${conf.folder}\\files\\${attch.Name}`, { dir: `${conf.folder}\\FilesTemp` }, err => {
                                     files = fs.readdirSync(`${conf.folder}\\FilesTemp`).length;
-                                logging.log(1, 'Email attachments', files);
+                                    logging.log(1, 'Email attachments', files);
                                     fs.removeSync(`${conf.folder}\\FilesTemp`);
                                     fs.unlinkSync(`${conf.folder}\\files\\LogFiles.zip`);
                                     if (files >= 6)
-                                    dash.sendReq(false);
-                                else
-                                    dash.sendReq(true);
-                            });
-                        }
+                                        dash.sendReq(false);
+                                    else
+                                        dash.sendReq(true);
+                                });
+                            }
+                        });
                     });
-                });
                 } else {
                     logging.log(1, 'The email does not have attachments', uniqueId);
-                dash.sendReq(true);
+                    dash.sendReq(true);
                 }
             }
         });
@@ -68,7 +68,7 @@ exch.SubscribeToStreamingNotifications([new ews.FolderId(ews.WellKnownFolderName
 });
 
 schedule.scheduleJob('00 1 * * *', () => {
-    if(flag)
+    if (flag)
         flag = false;
     else
         dash.sendReq(true);
